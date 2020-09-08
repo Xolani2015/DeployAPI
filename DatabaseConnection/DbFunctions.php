@@ -14,12 +14,13 @@
        public function createDriver($Name, $Surname, $Gender ,$Email, $Cell, $Usertype, 
        $DriverType, $UserCreateDate,$AccountActive,$Password)                                 
        {
-         if(!$this->EmailCheckerExist($Email))
+         if(!$this->EmailCheckerExistDriver($Email))
          {
+            $HasVehicle = "0";
             $stmt = $this->con->prepare("INSERT INTO driver (Name, Surname, Gender, Email, Cell, Usertype, DriverType, 
-            UserCreateDate, AccountActive, Password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("ssssisssss", $Name, $Surname, $Gender, $Email, $Cell, $Usertype, $DriverType, 
-                                         $UserCreateDate,$AccountActive,$Password);
+            UserCreateDate, AccountActive, Password, HasVehicle) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("ssssisssssi", $Name, $Surname, $Gender, $Email, $Cell, $Usertype, $DriverType, 
+                                         $UserCreateDate,$AccountActive,$Password, $HasVehicle);
             if($stmt->execute())
             {
                return DRIVER_CREATED;
@@ -36,24 +37,20 @@
      
        public function getAllDrivers()
        {
-         $stmt2 = $this->con->prepare("SELECT id, Name, Surname, Usertype, Cell, Password,
-         Email, DriverType, UserCreateDate, AccountActive, Gender FROM driver;");
+         $stmt2 = $this->con->prepare("SELECT id, Name, Surname, Cell, Password,
+         Email, DriverType, Gender FROM driver;");
          $stmt2->execute();
-         $stmt2->bind_result($id, $Name, $Surname, $Usertype, $Cell, $Password,
-         $Email, $DriverType, $UserCreateDate, $AccountActive, $Gender);
+         $stmt2->bind_result($id, $Name, $Surname, $Cell, $Password,
+         $Email, $DriverType,$Gender);
          $users = array();
          while($stmt2->fetch()){
          $user=array();
          $user['id']=$id;
          $user['Name']=$Name;
          $user['Surname']=$Surname;
-         $user['Usertype']=$Usertype;
          $user['Cell']=$Cell;
-         $user['Password']=$Password;
          $user['Email']=$Email;
          $user['DriverType']=$DriverType;
-         $user['UserCreateDate']=$UserCreateDate;
-         $user['AccountAccount']=$AccountActive;
          $user['Gender']=$Gender;
          array_push($users, $user);
          }
@@ -79,10 +76,10 @@
        public function getAllPassengers()
        {
          $stmt2 = $this->con->prepare("SELECT id, Name, Surname, Gender, BirthDate,Email,Cell,HomeAddress,UserCreateDate,Usertype,
-         AccountActive,PickUpLocation,DropOffLocation,Password,TripID FROM passenger WHERE AccountActive='true';");
+         AccountActive,PickUpLocation,DropOffLocation,Password FROM passenger WHERE AccountActive='true';");
          $stmt2->execute();
          $stmt2->bind_result($id, $Name, $Surname, $Gender, $BirthDate,$Email,$Cell,$HomeAddress,$UserCreateDate,$Usertype,
-         $AccountActive,$PickUpLocation,$DropOffLocation,$Password,$TripID);
+         $AccountActive,$PickUpLocation,$DropOffLocation,$Password);
          $users = array();
          while($stmt2->fetch()){
          $user=array();
@@ -100,7 +97,28 @@
          $user['DropOffLocation']=$DropOffLocation;
          $user['Usertype']=$Usertype;
          $user['Password']=$Password;
-         $user['TripID']=$TripID;
+         array_push($users, $user);
+         }
+          return $users;
+       }
+
+       public function getAllTrips()
+       {
+         $stmt2 = $this->con->prepare("SELECT trip.id, trip.HasDriver, trip.Bill,trip.ArrivalTime, trip.DepartureTime, 
+         pickuparea.PickUpArea, dropoffarea.DropOffArea FROM trip, pickuparea, 
+         dropoffarea WHERE dropoffarea.id=DropOffAreaID AND pickuparea.id=PickUpAreaID ORDER BY trip.id;");
+         $stmt2->execute();
+         $stmt2->bind_result($id, $HasDriver, $Bill, $ArrivalTime, $DepartureTime, $PickUpArea,$DropOffArea);
+         $users = array();
+         while($stmt2->fetch()){
+         $user=array();
+         $user['id']=$id;
+         $user['Bill']=$Bill;
+         $user['HasDriver']=$HasDriver;
+         $user['ArrivalTime']=$ArrivalTime;
+         $user['DepartureTime']=$DepartureTime;
+         $user['PickUpArea']=$PickUpArea;
+         $user['DropOffArea']=$DropOffArea;
          array_push($users, $user);
          }
           return $users;
@@ -109,7 +127,12 @@
        public function getAllPassengersList()
        {
          $stmt2 = $this->con->prepare("SELECT passenger.id, passenger.Name, passenger.Surname, passenger.Gender, passenger.BirthDate,passenger.Email,passenger.Cell,passenger.HomeAddress,passenger.UserCreateDate,passenger.Usertype,
-         passenger.AccountActive,passenger.PickUpLocation,passenger.DropOffLocation,passenger.Password,passenger.TripID, trip.Bill,trip.ArrivalTime, trip.DepartureTime, pickuparea.PickUpArea, dropoffarea.DropOffArea FROM passenger, trip, pickuparea, dropoffarea WHERE trip.id=TripID AND pickuparea.id=PickUpAreaID  AND dropoffarea.id=DropOffAreaID ORDER BY passenger.id;");
+         passenger.AccountActive,passenger.PickUpLocation,passenger.DropOffLocation,
+         passenger.Password,passenger.TripID, trip.Bill,trip.ArrivalTime, trip.DepartureTime, 
+         pickuparea.PickUpArea, dropoffarea.DropOffArea FROM passenger, trip, pickuparea, 
+         dropoffarea WHERE trip.id=TripID 
+         AND pickuparea.id=PickUpAreaID  AND 
+         dropoffarea.id=DropOffAreaID ORDER BY passenger.id;");
          $stmt2->execute();
          $stmt2->bind_result($id, $Name, $Surname, $Gender, $BirthDate,$Email,$Cell,$HomeAddress,$UserCreateDate,$Usertype,
          $AccountActive,$PickUpLocation,$DropOffLocation,$Password,$TripID, $Bill, $PickUpArea, $DropOffArea, $ArrivalTime, $DepartureTime);
@@ -141,25 +164,7 @@
           return $users;
        }
 
-       public function getAllTrips()
-       {
-         $stmt2 = $this->con->prepare("SELECT id, PickUpArea, DropOffArea, DriverName, Bill, ArrivalTime, DepartureTime FROM trip;");
-         $stmt2->execute();
-         $stmt2->bind_result($id, $PickUpArea , $DropOffArea, $DriverName, $Bill, $ArrivalTime, $DepartureTime);
-         $users = array();
-         while($stmt2->fetch()){
-         $user=array();
-         $user['id']=$id;
-         $user['PickUpArea']=$PickUpArea;
-         $user['DropOffArea']=$DropOffArea; 
-         $user['DriverName']=$DriverName;       
-         $user['Bill']=$Bill;
-         $user['ArrivalTime']=$ArrivalTime;
-         $user['DepartureTime']=$DepartureTime;
-         array_push($users, $user);
-         }
-          return $users;
-       }
+
 
        public function getAllPickUpArea()
        {
@@ -236,15 +241,32 @@
 
        public function createPassenger($Name , $Surname, $Gender, $BirthDate, $Email,
        $Cell, $HomeAddress, $UserCreateDate, $Usertype, $AccountActive, $PickUpLocation, $DropOffLocation, 
-       $Password, $TripID)
+       $Password, $TripID, $Assigned)
        {
-     
+            $Assigned=0;
             $stmt = $this->con->prepare("INSERT INTO passenger (Name , Surname, Gender, BirthDate, Email,
             Cell, HomeAddress, UserCreateDate, Usertype, AccountActive, PickUpLocation, DropOffLocation, 
-            Password, TripID) VALUES (?, ?, ?, ?, ?,?,?,?,?,?,?,?,?,?)");
-            $stmt->bind_param("sssssssssssssi",$Name , $Surname, $Gender, $BirthDate, $Email,
+            Password, TripID, Assigned) VALUES (?, ?, ?, ?, ?,?,?,?,?,?,?,?,?,?, ?)");
+            $stmt->bind_param("sssssssssssssii",$Name , $Surname, $Gender, $BirthDate, $Email,
             $Cell, $HomeAddress, $UserCreateDate, $Usertype, $AccountActive, $PickUpLocation, $DropOffLocation, 
-            $Password, $TripID);
+            $Password, $TripID, $Assigned);
+            if($stmt->execute())
+            {
+               return USER_CREATED;
+            }   
+            else
+            {
+               return USER_FAILURE;
+            }
+         
+        return USER_EXISTS;
+       }
+
+       public function createVehicle($Name , $Description, $Type, $Capacity, $SeatsAv, $State, $StateDescription, $DateAdded, $Registration)
+       {
+     
+            $stmt = $this->con->prepare("INSERT INTO vehicle (Name , Description, Type, Capacity, SeatsAv, State, StateDescription, DateAdded, Registration) VALUES (?, ?, ?, ?, ?,?,?,?,?)");
+            $stmt->bind_param("sssiissss",$Name , $Description, $Type, $Capacity, $SeatsAv, $State, $StateDescription, $DateAdded, $Registration);
             if($stmt->execute())
             {
                return USER_CREATED;
@@ -300,6 +322,28 @@
           }                
        } 
 
+       public function updateAssignDriverToPassenger($id, $Name)
+       {  
+          $DriverID = $this->getDriverByName($Name);
+          $HasDriver = "true";
+          $stmt = $this->con->prepare("UPDATE trip SET DriverID = ?, HasDriver = ? WHERE id = ?");
+          $stmt->bind_param("isi", $DriverID, $HasDriver, $id);
+          if($stmt->execute())
+          return true;
+          return false;
+       }
+
+       public function updateUnassignDriverToPassenger($id)
+       {  
+          $DriverID = NULL;
+          $HasDriver = "false";
+          $stmt = $this->con->prepare("UPDATE trip SET DriverID = ?, HasDriver = ? WHERE id = ?");
+          $stmt->bind_param("isi", $DriverID, $HasDriver, $id);
+          if($stmt->execute())
+          return true;
+          return false;
+       }
+
        public function getTripByPickUpAreaId($PickUpAreaID, $DropOffAreaID)
        {
             $stmt = $this->con->prepare("SELECT id FROM trip WHERE PickUpAreaID = ? AND DropOffAreaID = ?" );
@@ -327,13 +371,67 @@
             return $users; 
          } 
 
-       public function updateAssignTripToPassenger($PickUpArea2, $DropOffArea2, $id)
+         public function getDriverTrips($DriverID)
+         {
+              $stmt = $this->con->prepare("SELECT trip.id, pickuparea.PickUpArea, dropoffarea.DropOffArea, trip.ArrivalTime, trip.DepartureTime 
+              FROM trip, pickuparea, dropoffarea WHERE DriverID = ? AND trip.PickUpAreaID=pickuparea.id AND trip.DropOffAreaID =dropoffarea.id" );
+              $stmt->bind_param("i", $DriverID);
+              $stmt->execute();
+              $stmt->bind_result($id, $PickUpArea, $DropOffArea, $ArrivalTime,$DepartureTime);
+              $users = array();
+              while($stmt->fetch()){
+              $user=array();
+              $user['id']=$id;
+              $user['PickUpArea']=$PickUpArea;
+              $user['DropOffArea']=$DropOffArea;
+              $user['ArrivalTime']=$ArrivalTime;
+              $user['DepartureTime']=$DepartureTime;
+              array_push($users, $user);
+              }
+             return $users; 
+          } 
+
+         public function getAllUnassigedPassengers()
+         {
+              $stmt = $this->con->prepare("SELECT id, Name, Surname, Email, Cell, UserCreateDate, Gender, HomeAddress, PickUpLocation, DropOffLocation FROM passenger WHERE Assigned = 'false';" );
+              $stmt->execute();
+              $stmt->bind_result($id, $Name,$Surname,$Email, $Cell, $UserCreateDate,$Gender,$HomeAddress, $PickUpLocation,$DropOffLocation);
+              $users = array();
+              while($stmt->fetch()){
+              $user=array();
+              $user['id']=$id;
+              $user['Name']=$Name;
+              $user['Surname']=$Surname;
+              $user['Email']=$Email;
+              $user['Cell']=$Cell;
+              $user['UserCreateDate']=$UserCreateDate;
+              $user['Gender']=$Gender;
+              $user['HomeAddress']=$HomeAddress;
+              $user['PickUpLocation']=$PickUpLocation;
+              $user['DropOffLocation']=$DropOffLocation;
+              array_push($users, $user);
+              }
+             return $users; 
+          } 
+
+      public function GetVehicleNumberSeatsAv($id){
+         $stmt = $this->con->prepare("SELECT vehicle.id FROM driver, vehicle WHERE vehicle.id=VehicleID;" );
+         $stmt->bind_param("ii", $PickUpAreaID, $DropOffAreaID);
+         $stmt->execute();
+         $stmt->bind_result($id);
+         $stmt->fetch();
+         $user=array();  
+         return $id;            
+      }
+
+       public function updateAssignTripToPassenger($PickUpArea2, $DropOffArea2, $id, $Assigned2)
        {
           $PickUpAreaID = $this->getPickUpAreaByName($PickUpArea2);
           $DropOffAreaID = $this->getDropOffAreaByName($DropOffArea2);
           $TripID = $this->getTripByPickUpAreaId($PickUpAreaID, $DropOffAreaID);
-          $stmt = $this->con->prepare("UPDATE Passenger SET TripID = ? WHERE id = ?");
-          $stmt->bind_param("ii", $TripID, $id);
+          $Assigned =$Assigned2;
+          $stmt = $this->con->prepare("UPDATE passenger SET TripID = ?, Assigned = ? WHERE id = ?");
+          $stmt->bind_param("iii", $TripID, $Assigned, $id);
           if($stmt->execute())
           return true;
           return false;
@@ -342,20 +440,37 @@
        public function updateUnassignTripToPassenger($id)
        {
           $TripID = null;
-          $stmt = $this->con->prepare("UPDATE passenger SET TripID = ? WHERE id = ?");
-          $stmt->bind_param("ii", $TripID, $id);
+          $Assigned = 0;
+          $stmt = $this->con->prepare("UPDATE passenger SET TripID = ?,Assigned = ?  WHERE id = ?");
+          $stmt->bind_param("iii", $TripID,  $Assigned, $id);
           if($stmt->execute())
           return true;
           return false;
        }
     
-       public function createTrip($PickUpArea2, $DropOffArea2, $DriverName2, $Bill, $ArrivalTime, $DepartureTime)
+       public function createTrip($PickUpArea2, $DropOffArea2, $Bill, $ArrivalTime, $DepartureTime)
        { 
             $PickUpAreaID = $this->getPickUpAreaByName($PickUpArea2);
             $DropOffAreaID = $this->getDropOffAreaByName($DropOffArea2);
-            $DriverID = $this->getDriverByName($DriverName2);
-            $stmt = $this->con->prepare("INSERT INTO trip (PickUpAreaID, DropOffAreaID, DriverID, Bill, ArrivalTime, DepartureTime) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("iiisss",$PickUpAreaID, $DropOffAreaID, $DriverID, $Bill, $ArrivalTime, $DepartureTime);
+            $HasDriver = "false";
+            $stmt = $this->con->prepare("INSERT INTO trip (PickUpAreaID, DropOffAreaID, ArrivalTime, DepartureTime, HasDriver) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("iisss",$PickUpAreaID, $DropOffAreaID, $ArrivalTime, $DepartureTime, $HasDriver);
+            if($stmt->execute())
+            {
+               return USER_CREATED;
+            }   
+            else
+            {
+               return USER_FAILURE;
+            }      
+        return USER_EXISTS;
+       }
+
+       public function createTripTest($Bill, $ArrivalTime, $DepartureTime)
+       { 
+            $HasDriver = "false";
+            $stmt = $this->con->prepare("INSERT INTO trip (Bill, ArrivalTime, DepartureTime, HasDriver) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("ssss",$Bill, $ArrivalTime, $DepartureTime, $HasDriver);
             if($stmt->execute())
             {
                return USER_CREATED;
@@ -518,19 +633,27 @@
 
      public function getDriverById($id)
      {
-          $stmt = $this->con->prepare("SELECT id, Name, Surname, UserType, Email FROM driver WHERE id = ?");
+          $stmt = $this->con->prepare("SELECT id, Name, Surname, Email, Cell, Gender, UserCreateDate, DriverType, AccountActive, HasVehicle FROM driver WHERE id = ?");
           $stmt->bind_param("i", $id);
           $stmt->execute();
-          $stmt->bind_result($id, $Name, $Surname, $UserType, $Email);
+          $stmt->bind_result($id, $Name, $Surname,  $Email, $Cell, $Gender, $UserCreateDate, $DriverType, $AccountActive, $HasVehicle);
           $stmt->fetch();
           $user=array();
           $user['id']=$id;
           $user['Name']=$Name;
           $user['Surname']=$Surname;
-          $user['UserType']=$UserType;
           $user['Email']=$Email;
+          $user['Cell']=$Cell;
+          $user['Gender']=$Gender;
+          $user['UserCreateDate']=$UserCreateDate;
+          $user['DriverType']=$DriverType;
+          $user['AccountActive']=$AccountActive;
+          $user['HasVehicle']=$HasVehicle;
           return $user; 
       } 
+
+      
+  
 
        public function getTripDriver($id)
        {
@@ -541,6 +664,67 @@
           $stmt->fetch();
           $user=array();
           return $DriverID; 
+       } 
+
+       public function getDriverVehicleById($id)
+       {
+          $stmt = $this->con->prepare("SELECT driver.id, driver.Name, driver.Surname, driver.Email, 
+          driver.Cell, driver.Gender, driver.UserCreateDate, driver.DriverType,
+          driver.AccountActive, driver.HasVehicle, 
+          vehicle.Name, vehicle.Description, vehicle.Type, vehicle.Capacity, vehicle.State, vehicle.StateDescription, 
+          vehicle.DateAdded,vehicle.Registration FROM driver, vehicle WHERE driver.id = ?
+          AND driver.VehicleID=vehicle.id");
+          $stmt->bind_param("i", $id);
+          $stmt->execute();
+          $stmt->bind_result($id, $Name, $Surname, $Email, $Cell, $Gender, $UserCreateDate, $DriverType,$AccountActive,
+          $HasVehicle, $VehicleName, $VehicleDescription, $VehicleType, $VehicleCapacity, $VehicleState, 
+          $VehicleStateDescription, $VehicleDateAdded, $VehicleRegistration);
+          $stmt->fetch();
+          $user=array();
+          $user['id']=$id;
+          $user['Name']=$Name;
+          $user['Surname']=$Surname;
+          $user['Email']=$Email;
+          $user['Cell']=$Cell;
+          $user['Gender']=$Gender;
+          $user['UserCreateDate']=$UserCreateDate;
+          $user['DriverType']=$DriverType;
+          $user['AccountActive']=$AccountActive;
+          $user['HasVehicle']=$HasVehicle;
+          
+          $user['VehicleName']=$VehicleName;
+          $user['VehicleDescription']=$VehicleDescription;
+          $user['VehicleType']=$VehicleType;
+          $user['VehicleCapacity']=$VehicleCapacity;
+          $user['VehicleStateDescription']=$VehicleStateDescription;
+          $user['VehicleDateAdded']=$VehicleDateAdded;
+          $user['VehicleRegistration']=$VehicleRegistration;
+          return $user; 
+       } 
+
+
+       public function getDriverPassengersById($id)
+       {
+          $stmt = $this->con->prepare("SELECT passenger.Name, passenger.Surname, passenger.Gender, passenger.Email, passenger.Cell,
+          passenger.PickUpLocation, passenger.DropOffLocation, trip.id FROM driver, trip, passenger WHERE driver.id = ?
+          AND trip.DriverID=driver.id AND passenger.TripID=trip.id");
+          $stmt->bind_param("i", $id);
+          $stmt->execute();
+          $stmt->bind_result($Name, $Surname, $Gender, $Email, $Cell, $PK, $DP, $TripID );
+          $users = array();
+          while($stmt->fetch()){
+            $user=array();
+            $user['Name']=$Name;
+            $user['Surname']=$Surname;
+            $user['Gender']=$Gender;
+            $user['Email']=$Email;
+            $user['Cell']=$Cell;
+            $user['PickUpLocation']=$PK;
+            $user['DropOffLocation']=$DP;
+            $user['TripID']=$TripID;
+            array_push($users, $user);
+            }
+           return $users; 
        } 
 
        public function getPassengerTripId($id)
@@ -556,7 +740,6 @@
 
        public function getPassengerTrip($id2)
        {
-          $id2 = 11;
           $id = $this->getPassengerTripId($id2);
           $stmt = $this->con->prepare("SELECT id, PickUpArea, DropOffArea, DriverName, Bill, ArrivalTime, DepartureTime FROM trip WHERE id = ?");
           $stmt->bind_param("i", $id);
@@ -573,6 +756,7 @@
           $user['DepartureTime']=$DepartureTime;
           return $user; 
        } 
+
 
 
        public function getShowTripDriver($tripid)
@@ -608,32 +792,70 @@
           return $user; 
        }
 
-       public function getTripById($id)
+       public function getTripByIdForTripWithNoDriver($id)
        {
-          $stmt = $this->con->prepare("SELECT id, PickUpArea, DropOffArea, DriverName, Bill, ArrivalTime, DepartureTime FROM trip WHERE id = ?");
-          $stmt->bind_param("s", $id);
+          $stmt = $this->con->prepare("SELECT trip.id, trip.HasDriver, pickuparea.PickUpArea, dropoffarea.DropOffArea, pickuparea.id, dropoffarea.id, 
+          Bill, ArrivalTime, DepartureTime FROM trip, 
+          pickuparea, dropoffarea WHERE trip.id = ? AND 
+          PickUpAreaID=pickuparea.id AND DropOffAreaID=dropoffarea.id");
+ 
+          $stmt->bind_param("i", $id);
           $stmt->execute();
-          $stmt->bind_result($id,$PickUpArea, $DropOffArea, $DriverName, $Bill, $ArrivalTime, $DepartureTime);
+          $stmt->bind_result($id,$HasDriver, $PickUpArea, $DropOffArea, $PickUpAreaID, $DropOffAreaID, $Bill, $ArrivalTime, $DepartureTime);
           $stmt->fetch();
           $user=array();
           $user['id']=$id;
+          $user['HasDriver']=$HasDriver;
           $user['PickUpArea']=$PickUpArea;
           $user['DropOffArea']=$DropOffArea;
-          $user['DriverName']=$DriverName;
           $user['Bill']=$Bill;
           $user['ArrivalTime']=$ArrivalTime;
           $user['DepartureTime']=$DepartureTime;
+          $user['PickUpAreaID']=$PickUpAreaID;
+          $user['DropOffAreaID']=$DropOffAreaID;
+          return $user; 
+       } 
+
+       public function getTripById($id)
+       {
+          $stmt = $this->con->prepare("SELECT trip.id, trip.HasDriver, pickuparea.PickUpArea, dropoffarea.DropOffArea, driver.Name, 
+          driver.Surname, driver.id, driver.Cell, 
+          driver.Email, driver.Gender, pickuparea.id, dropoffarea.id, 
+          Bill, ArrivalTime, DepartureTime FROM trip, 
+          pickuparea, dropoffarea, driver WHERE trip.id = ? AND 
+          PickUpAreaID=pickuparea.id AND DropOffAreaID=dropoffarea.id 
+          AND DriverID=driver.id");
+          $stmt->bind_param("i", $id);
+          $stmt->execute();
+          $stmt->bind_result($id,$HasDriver, $PickUpArea, $DropOffArea, $Name, $Surname, $DriverID,$Cell, $Email,$Gender, $PickUpAreaID, $DropOffAreaID, $Bill, $ArrivalTime, $DepartureTime);
+          $stmt->fetch();
+          $user=array();
+          $user['id']=$id;
+          $user['HasDriver']=$HasDriver;
+          $user['PickUpArea']=$PickUpArea;
+          $user['DropOffArea']=$DropOffArea;
+          $user['Name']=$Name;
+          $user['Surname']=$Surname;
+          $user['DriverID']=$DriverID;
+          $user['Bill']=$Bill;
+          $user['ArrivalTime']=$ArrivalTime;
+          $user['DepartureTime']=$DepartureTime;
+          $user['PickUpAreaID']=$PickUpAreaID;
+          $user['DropOffAreaID']=$DropOffAreaID;
+          $user['Email']=$Email;
+          $user['Gender']=$Gender;
+          $user['Cell']=$Cell;
           return $user; 
        } 
 
        public function getPassengerById($id)
        {
           $stmt = $this->con->prepare("SELECT id, Name, Surname, Gender, BirthDate,Email,Cell,HomeAddress,PickUpLocation, 
-          DropOffLocation FROM passenger WHERE id = ?");
+          DropOffLocation, Assigned FROM passenger WHERE id = ?");
           $stmt->bind_param("i", $id);
           $stmt->execute();
           $stmt->bind_result($id, $Name, $Surname, $Gender, $BirthDate,$Email,$Cell,$HomeAddress, $PickUpLocation, 
-          $DropOffLocation);
+          $DropOffLocation, $Assigned);
           $stmt->fetch();
           $user=array();
           $user['id']=$id;
@@ -646,6 +868,42 @@
           $user['HomeAddress']=$HomeAddress;
           $user['PickUpLocation']=$PickUpLocation;
           $user['DropOffLocation']=$DropOffLocation;
+          $user['Assigned']=$Assigned;
+          return $user; 
+       } 
+
+       public function getPassengerTripById($id)
+       {
+      
+          $stmt = $this->con->prepare("SELECT passenger.id, passenger.Name, passenger.Surname,passenger.Gender, passenger.BirthDate,
+          passenger.HomeAddress,passenger.Email,passenger.Cell, passenger.PickUpLocation,
+          passenger.DropOffLocation, passenger.TripID, trip.Bill,trip.ArrivalTime, 
+          trip.DepartureTime, pickuparea.PickUpArea, dropoffarea.DropOffArea
+          FROM passenger, trip, pickuparea, dropoffarea
+          WHERE passenger.id = ? AND trip.id=TripID AND pickuparea.id=PickUpAreaID
+          AND dropoffarea.id=DropOffAreaID ORDER BY passenger.id;");
+          $stmt->bind_param("i", $id);
+          $stmt->bind_result($id, $Name, $Surname,$Gender, $BirthDate,$HomeAddress, $Email, $Cell, $PickUpLocation,$DropOffLocation,$TripID, $Bill,$ArrivalTime,
+          $DepartureTime, $PickUpArea,  $DropOffArea);
+          $stmt->execute();
+          $stmt->fetch();
+          $user=array();
+          $user['id']=$id;
+          $user['Name']=$Name;
+          $user['Surname']=$Surname;
+          $user['Gender']=$Gender;
+          $user['Email']=$Email;
+          $user['Cell']=$Cell;
+          $user['BirthDate']=$BirthDate;
+          $user['HomeAddress']=$HomeAddress; 
+          $user['PickUpLocation']=$PickUpLocation;
+          $user['DropOffLocation']=$DropOffLocation;
+          $user['TripID']=$TripID;
+          $user['Bill']=$Bill;
+          $user['ArrivalTime']=$ArrivalTime;
+          $user['PickUpArea']=$PickUpArea;
+          $user['DropOffArea']=$DropOffArea;
+          $user['DepartureTime']=$DepartureTime;
           return $user; 
        } 
 
@@ -667,7 +925,7 @@
 
       public function getDriverByEmail($Email)
       {
-         $stmt = $this->con->prepare("SELECT id, Name, Surname, Usertype, Email FROM driver WHERE Email = ?");
+         $stmt = $this->con->prepare("SELECT id, Name,Surname, Usertype, Email FROM driver WHERE Email = ?");
          $stmt->bind_param("s", $Email);
          $stmt->execute();
          $stmt->bind_result($id, $Name, $Surname, $Usertype, $Email);
@@ -679,6 +937,30 @@
          $user['UserType']=$Usertype;
          $user['Email']=$Email;
          return $user; 
+      }
+
+      public function DriverLogin2($Email, $Password)
+      {
+         if($this->EmailCheckerExistDriver($Email)){
+            $hashed_password = $this->getDriverPasswordByEmail($Email);
+            if(password_verify($Password, $hashed_password)){
+               return USER_AUTHENTICATED;
+            }else{
+               return USER_PASSWORD_DO_NOT_MATCH;
+            }
+         }else{
+            return USER_NOT_FOUND;
+         }
+      }
+
+      public function getDriverPasswordByEmail($Email)
+      {
+         $stmt = $this->con->prepare("SELECT Password FROM driver WHERE Email = ?");
+         $stmt->bind_param("s", $Email);
+         $stmt->execute();
+         $stmt->bind_result($Password);
+         $stmt->fetch();
+         return $Password; 
       }    
       
       public function updateUser($Name, $Surname, $Email, $Cell, $id)
@@ -743,6 +1025,8 @@
             return true;
          return false;
       }
+
+
 
       public function ActivatePassengerAccount($AccountActive, $id)
       {

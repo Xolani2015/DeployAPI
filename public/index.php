@@ -30,11 +30,11 @@ $app->post('/createdriver', function(Request $request, Response $response){
         $DriverType = $request_data['DriverType'];
         $UserCreateDate = date("m/d/Y");
         $AccountActive = "true";
-        $Password = "DriverPassword";
+        $Password = "NULL";
         $HashedPassword = password_hash($Password, PASSWORD_DEFAULT);
         $db = new DbFunctions;
         $result = $db->createDriver($Name, $Surname, $Gender ,$Email, $Cell, $Usertype, 
-        $DriverType, $UserCreateDate,$AccountActive,$Password);
+        $DriverType, $UserCreateDate,$AccountActive,$HashedPassword);
         if($result == DRIVER_CREATED){              
            $message = array();
            $message['error'] = false;
@@ -59,7 +59,7 @@ $app->post('/createdriver', function(Request $request, Response $response){
 
            $message = array();
            $message['error'] = true;
-           $message['message'] = 'Email already exsit bro';
+           $message['message'] = 'Email already exsit';
            
            $response->write(json_encode($message));
 
@@ -75,7 +75,7 @@ $app->post('/createdriver', function(Request $request, Response $response){
 });
 
 $app->post('/createpassenger', function(Request $request, Response $response){
-    if(!haveEmptyParameters(array('Name'), $request,$response)){
+    if(!haveEmptyParameters(array('Name', 'Surname','Gender', 'BirthDate', 'Email', 'Cell', 'HomeAddress', 'PickUpLocation', 'DropOffLocation'), $request,$response)){
         $request_data = $request->getParsedBody();
         $Name = $request_data['Name'];
         $Surname = $request_data['Surname'];
@@ -89,10 +89,64 @@ $app->post('/createpassenger', function(Request $request, Response $response){
         $AccountActive = "true";
         $PickUpLocation = $request_data['PickUpLocation'];
         $DropOffLocation = $request_data['DropOffLocation'];
-        $Password = $request_data['Temp'];;
+        $Password = "NULL";
         $TripID = NULL;
-        $db = new DbFunctions ;
-        $result = $db->createPassenger($Name, $Surname, $Gender, $BirthDate, $Email, $Cell, $HomeAddress, $UserCreateDate, $Usertype, $AccountActive, $PickUpLocation, $DropOffLocation, $Password, $TripID);
+        $Assigned = 0;
+        $db = new DbFunctions;
+        $result = $db->createPassenger($Name, $Surname, $Gender, $BirthDate, $Email, $Cell, $HomeAddress, $UserCreateDate, $Usertype, $AccountActive, $PickUpLocation, $DropOffLocation, $Password, $TripID, $Assigned);
+
+        if($result == USER_CREATED){        
+           $message = array();
+           $message['error'] = false;
+           $message['message'] = 'User created successfully';        
+           $response->write(json_encode($message));
+           return $response
+                       ->withHeader('Content-type', 'application/json')
+                       ->withStatus(201);
+        }else if($result == USER_FAILURE){
+           $message = array();
+           $message['error'] = true;
+           $message['message'] = 'NOOO Some error happened';
+           
+           $response->write(json_encode($message));
+
+           return $response
+                       ->withHeader('Content-type', 'application/json')
+                       ->withStatus(422);
+
+        }else if ($result == USER_EXISTS){
+
+           $message = array();
+           $message['error'] = true;
+           $message['message'] = 'Surname already exsit bro';
+           
+           $response->write(json_encode($message));
+
+           return $response
+                       ->withHeader('Content-type', 'application/json')
+                       ->withStatus(422);
+        }
+
+    }
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(422);
+});
+
+$app->post('/createvehicle', function(Request $request, Response $response){
+    if(!haveEmptyParameters(array('Name' , 'Description', 'Type', 'Capacity', 'SeatsAv', 'StateDescription', 'Registration'), $request,$response)){
+        $request_data = $request->getParsedBody();
+        $Name = $request_data['Name'];
+        $Description = $request_data['Description'];
+        $Type = $request_data['Type'];
+        $Capacity = $request_data['Capacity'];
+        $SeatsAv= $request_data['SeatsAv'];
+        $State ="Working";
+        $StateDescription = $request_data['StateDescription'];
+        $DateAdded = date("m/d/Y");
+        $Registration = $request_data['Registration'];
+        $db = new DbFunctions;
+        $result = $db->createVehicle($Name , $Description, $Type, $Capacity, $SeatsAv, $State, $StateDescription, $DateAdded, $Registration);
 
         if($result == USER_CREATED){        
            $message = array();
@@ -146,18 +200,65 @@ $app->post('/createpassenger', function(Request $request, Response $response){
      endpoint =  Assign Driver to a trip
      Arguments = DriverID and TripID
 */
-
-$app->post('/createtrip', function(Request $request, Response $response){
-    if(!haveEmptyParameters(array('PickUpArea', 'DropOffArea', 'DriverName', 'Bill', 'ArrivalTime', 'DepartureTime'), $request,$response)){
+$app->post('/createTripTest', function(Request $request, Response $response){
+    if(!haveEmptyParameters(array('Bill', 'ArrivalTime', 'DepartureTime'), $request,$response)){
         $request_data = $request->getParsedBody();
-        $PickUpArea = $request_data['PickUpArea'];
-        $DropOffArea = $request_data['DropOffArea'];
-        $DriverName = $request_data['DriverName'];
         $Bill = $request_data['Bill'];
         $ArrivalTime = $request_data['ArrivalTime'];
         $DepartureTime = $request_data['DepartureTime'];
+        
         $db = new DbFunctions ;
-        $result = $db->createTrip($PickUpArea, $DropOffArea, $DriverName, $Bill, $ArrivalTime, $DepartureTime);
+        $result = $db->createTripTest($Bill,$ArrivalTime, $DepartureTime);
+
+        if($result == USER_CREATED){        
+           $message = array();
+           $message['error'] = false;
+           $message['message'] = 'User created successfully';        
+           $response->write(json_encode($message));
+           return $response
+                       ->withHeader('Content-type', 'application/json')
+                       ->withStatus(201);
+        }else if($result == USER_FAILURE){
+           $message = array();
+           $message['error'] = true;
+           $message['message'] = 'NOOO Some error happened';
+           
+           $response->write(json_encode($message));
+
+           return $response
+                       ->withHeader('Content-type', 'application/json')
+                       ->withStatus(422);
+
+        }else if ($result == USER_EXISTS){
+
+           $message = array();
+           $message['error'] = true;
+           $message['message'] = 'Surname already exsit bro';
+           
+           $response->write(json_encode($message));
+
+           return $response
+                       ->withHeader('Content-type', 'application/json')
+                       ->withStatus(422);
+        }
+
+    }
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(422);
+});
+$app->post('/createtrip', function(Request $request, Response $response){
+    if(!haveEmptyParameters(array('PickUpArea', 'DropOffArea', 'ArrivalTime', 'DepartureTime'), $request,$response)){
+        $request_data = $request->getParsedBody();
+        $PickUpArea = $request_data['PickUpArea'];
+        $DropOffArea = $request_data['DropOffArea'];
+      
+        
+        $ArrivalTime = $request_data['ArrivalTime'];
+        $DepartureTime = $request_data['DepartureTime'];
+        $HasDriver = 0;
+        $db = new DbFunctions ;
+        $result = $db->createTrip($PickUpArea, $DropOffArea,$ArrivalTime, $DepartureTime, $HasDriver);
 
         if($result == USER_CREATED){        
            $message = array();
@@ -367,6 +468,62 @@ $app->post('/createuser', function(Request $request, Response $response){
      ->withStatus(422);
 });
 
+$app->post('/driverlogin', function(Request $request, Response $response){
+    if(!haveEmptyParameters(array('Email', 'Password'), $request, $response)){
+        $request_data = $request->getParsedBody();
+
+        $Email = $request_data['Email'];
+        $Password = $request_data['Password'];
+
+        $db = new DbFunctions;
+
+        $result = $db->Driverlogin2($Email,$Password);
+
+        if($result == USER_AUTHENTICATED){
+           $user = $db->getDriverByEmail($Email);
+           $response_data = array();
+
+           $response_data['error']=false;
+           $response_data['message']='Loging Successful';
+           $response_data['user']=$user;
+
+           $response->write(json_encode($response_data));
+
+           return $response
+           ->withHeader('Content-type', 'application/json')
+           ->withStatus(200);
+
+        }else if($result == USER_NOT_FOUND){
+            $response_data = array();
+
+            $response_data['error']=true;
+            $response_data['message']='User doesnt exist';
+ 
+            $response->write(json_encode($response_data));
+ 
+            return $response
+            ->withHeader('Content-type', 'application/json')
+            ->withStatus(404);
+        }else if($result == USER_PASSWORD_DO_NOT_MATCH){
+            $response_data = array();
+
+            $response_data['error']=true;
+            $response_data['message']='Password does not match';
+       
+ 
+            $response->write(json_encode($response_data));
+ 
+            return $response
+            ->withHeader('Content-type', 'application/json')
+            ->withStatus(200);
+        }
+    }
+   
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(422);
+ });
+
 $app->post('/userlogin', function(Request $request, Response $response){
     if(!haveEmptyParameters(array('Email', 'Password'), $request, $response)){
         $request_data = $request->getParsedBody();
@@ -423,60 +580,8 @@ $app->post('/userlogin', function(Request $request, Response $response){
  });
 
 
- $app->post('/driverlogin', function(Request $request, Response $response){
-    if(!haveEmptyParameters(array('Email', 'Password'), $request, $response)){
-        $request_data = $request->getParsedBody();
-        $Email = $request_data['Email'];
-        $Password = $request_data['Password'];
-
-        $db = new DbFunctions;
-
-        $result = $db->DriverLogin($Email,$Password);
-
-        if($result == USER_AUTHENTICATED){
-           $user = $db->getUserByEmail($Email);
-           $response_data = array();
-
-           $response_data['error']=false;
-           $response_data['message']='Loging Successful';
-           $response_data['user']=$user;
-
-           $response->write(json_encode($response_data));
-
-           return $response
-           ->withHeader('Content-type', 'application/json')
-           ->withStatus(200);
-
-        }else if($result == USER_NOT_FOUND){
-            $response_data = array();
-
-            $response_data['error']=true;
-            $response_data['message']='User doesnt exist';
  
-            $response->write(json_encode($response_data));
- 
-            return $response
-            ->withHeader('Content-type', 'application/json')
-            ->withStatus(404);
-        }else if($result == USER_PASSWORD_DO_NOT_MATCH){
-            $response_data = array();
 
-            $response_data['error']=true;
-            $response_data['message']='Password does not match';
-            $response_data['user']=$user;
- 
-            $response->write(json_encode($response_data));
- 
-            return $response
-            ->withHeader('Content-type', 'application/json')
-            ->withStatus(200);
-        }
-    }
-   
-    return $response
-    ->withHeader('Content-type', 'application/json')
-    ->withStatus(422);
- });
 
  $app->get('/allusers', function(Request $request, Response $response){
          $db = new DbFunctions;
@@ -487,7 +592,7 @@ $app->post('/userlogin', function(Request $request, Response $response){
          $response_data['error'] = false;
          $response_data['users'] = $users;
 
-         $response->write(json_encode($users));
+         $response->write(json_encode($response_data));
 
          return $response
          ->withHeader('Content-type', 'application/json')
@@ -559,21 +664,7 @@ $app->get('/alldriversNames', function(Request $request, Response $response){
     ->withStatus(200);
 });
 
-$app->get('/findall', function(Request $request, Response $response){
-    $db = new DbFunctions;
-    $users = $db->getAllTrips();
 
-    $response_data = array();
-
-    $response_data['error'] = false;
-    $response_data['users'] = $users;
-
-    $response->write(json_encode($users));
-
-    return $response
-    ->withHeader('Content-type', 'application/json')
-    ->withStatus(200);
-});
 
 $app->get('/allpickup', function(Request $request, Response $response){
     $db = new DbFunctions;
@@ -607,6 +698,22 @@ $app->get('/alldropoff', function(Request $request, Response $response){
     ->withStatus(200);
 });
 
+$app->get('/alltrips', function(Request $request, Response $response){
+    $db = new DbFunctions;
+    $users = $db->getAllTrips();
+
+    $response_data = array();
+
+    $response_data['error'] = false;
+    $response_data['users'] = $users;
+
+    $response->write(json_encode($users));
+
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(200);
+});
+
 
 $app->get('/alltrippassengers/{id}', function(Request $request, Response $response){
     $id = $args['id'];
@@ -624,6 +731,8 @@ $app->get('/alltrippassengers/{id}', function(Request $request, Response $respon
     ->withHeader('Content-type', 'application/json')
     ->withStatus(200);
 });
+
+
 
 $app->get('/alltripsassignedtodriver/{id}', function(Request $request, Response $response){
     $id = $args['id'];
@@ -657,6 +766,39 @@ $app->get('/allpassengers', function(Request $request, Response $response){
     ->withHeader('Content-type', 'application/json')
     ->withStatus(200);
 });
+
+$app->get('/allpassengerssimple', function(Request $request, Response $response){
+    $db = new DbFunctions;
+    $users = $db->getAllPassengers();
+
+    $response_data = array();
+
+    $response_data['error'] = false;
+    $response_data['users'] = $users;
+
+    $response->write(json_encode($users));
+
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(200);
+});
+
+$app->get('/allUnasignedpassengers', function(Request $request, Response $response){
+    $db = new DbFunctions;
+    $users = $db->getAllUnassigedPassengers();
+
+    $response_data = array();
+
+    $response_data['error'] = false;
+    $response_data['users'] = $users;
+
+    $response->write(json_encode($users));
+
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(200);
+});
+
 
  
 
@@ -698,6 +840,24 @@ $app->get('/driver/{id}', function(Request $request, Response $response,  array 
     ->withStatus(200); 
 });
 
+
+$app->get('/alldrivertrips/{id}', function(Request $request, Response $response,  array $args){
+    $id = $args['id'];
+    $db = new DbFunctions;
+    $user = $db->getDriverTrips($id);
+
+    $response_data = array();
+
+    $response_data['error'] = false;
+    $response_data['user'] = $user;
+
+    $response->write(json_encode($user));
+
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(200); 
+});
+
 $app->get('/gettrippassengers/{id}', function(Request $request, Response $response,  array $args){
     $id = $args['id'];
     $db = new DbFunctions;
@@ -709,6 +869,41 @@ $app->get('/gettrippassengers/{id}', function(Request $request, Response $respon
     $response_data['user'] = $user;
 
     $response->write(json_encode($user));
+
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(200); 
+});
+
+$app->get('/drivervehicle/{id}', function(Request $request, Response $response,  array $args){
+    $id = $args['id'];
+    $db = new DbFunctions;
+    $user = $db->getDriverVehicleById($id);
+
+    $response_data = array();
+
+    $response_data['error'] = false;
+    $response_data['user'] = $user;
+
+    $response->write(json_encode($user));
+
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(200); 
+});
+
+
+$app->get('/driverpassengers/{id}', function(Request $request, Response $response,  array $args){
+    $id = $args['id'];
+    $db = new DbFunctions;
+    $user = $db->getDriverPassengersById($id);
+
+    $response_data = array();
+
+    $response_data['error'] = false;
+    $response_data['users'] = $user;
+
+    $response->write(json_encode($response_data));
 
     return $response
     ->withHeader('Content-type', 'application/json')
@@ -805,7 +1000,7 @@ $app->get('/dropoff/{id}', function(Request $request, Response $response,  array
 });
 
 
-$app->get('/passenger/{id}', function(Request $request, Response $response,  array $args){
+$app->get('/passengerprofile/{id}', function(Request $request, Response $response,  array $args){
     $id = $args['id'];
     $db = new DbFunctions;
     $user = $db->getPassengerById($id);
@@ -823,6 +1018,56 @@ $app->get('/passenger/{id}', function(Request $request, Response $response,  arr
 });
 
 
+$app->get('/passenger/{id}', function(Request $request, Response $response,  array $args){
+    $id = $args['id'];
+    $db = new DbFunctions;
+    $user = $db->getPassengerById($id);
+
+    $response_data = array();
+
+    $response_data['error'] = false;
+    $response_data['user'] = $user;
+
+    $response->write(json_encode($user));
+
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(200); 
+});
+
+$app->get('/passengewithtrip/{id}', function(Request $request, Response $response,  array $args){
+    $id = $args['id'];
+    $db = new DbFunctions;
+    $user = $db->getPassengerTripById($id);
+
+    $response_data = array();
+
+    $response_data['error'] = false;
+    $response_data['user'] = $user;
+
+    $response->write(json_encode($user));
+
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(200); 
+});
+
+$app->get('/tripwithnodriver/{id}', function(Request $request, Response $response,  array $args){
+    $id = $args['id'];
+    $db = new DbFunctions;
+    $user = $db->getTripByIdForTripWithNoDriver($id);
+
+    $response_data = array();
+
+    $response_data['error'] = false;
+    $response_data['user'] = $user;
+
+    $response->write(json_encode($user));
+
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(200); 
+});
 
 
 $app->get('/trip/{id}', function(Request $request, Response $response,  array $args){
@@ -846,6 +1091,24 @@ $app->get('/driverpick/{id}', function(Request $request, Response $response,  ar
     $id = $args['id'];
     $db = new DbFunctions;
     $user = $db->getDriverByEmail($id);
+
+    $response_data = array();
+
+    $response_data['error'] = false;
+    $response_data['user'] = $user;
+
+    $response->write(json_encode($user));
+
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(200); 
+});
+
+
+$app->get('/passengertrip/{id}', function(Request $request, Response $response,  array $args){
+    $id = $args['id'];
+    $db = new DbFunctions;
+    $user = $db->getPassengerTripById($id);
 
     $response_data = array();
 
@@ -973,16 +1236,16 @@ $app->put('/updateuser/{id}', function(Request $request, Response $response, arr
        ->withStatus(200);
 });
 
-
-$app->put('/assigntriptopassenger/{id}', function(Request $request, Response $response, array $args){
+$app->put('/asigntriptopassenger/{id}', function(Request $request, Response $response, array $args){
     $id = $args['id'];
-    if(!haveEmptyParameters(array('PickUpArea', 'DropOffArea','id'), $request,$response)){    
+
+    if(!haveEmptyParameters(array('id, PickUpArea, DropOffArea'), $request,$response)){     
       $request_data = $request->getParsedBody();
+      $id = $request_data['id'];
       $PickUpArea = $request_data['PickUpArea'];
       $DropOffArea = $request_data['DropOffArea'];
-      $id = $request_data['id'];
       $db = new DbFunctions;
-      if($db->updateAssignTripToPassenger($PickUpArea, $DropOffArea,$id)){
+      if($db->updateAssignTripToPassenger($id, $PickUpArea, $DropOffArea)){
           $response_data = array();
           $response_data['error'] = false;
           $response_data['message'] = 'User Upadted Succesfully';
@@ -994,8 +1257,6 @@ $app->put('/assigntriptopassenger/{id}', function(Request $request, Response $re
          $response_data = array();
          $response_data['error'] = true;
          $response_data['message'] = 'PLS TRY LATER';
-         $user = $db->getDriverByEmail($Email);
-         $response_data['user'] = $user;
 
          $response->write(json_encode($response_data));
 
@@ -1011,13 +1272,77 @@ $app->put('/assigntriptopassenger/{id}', function(Request $request, Response $re
 });
 
 
+$app->put('/assigndrivertotrip/{id}', function(Request $request, Response $response, array $args){
+    $id = $args['id'];
+
+    if(!haveEmptyParameters(array('Name'), $request,$response)){     
+      $request_data = $request->getParsedBody();
+      $Name = $request_data['Name'];
+      $db = new DbFunctions;
+      if($db->updateAssignDriverToPassenger($id, $Name)){
+          $response_data = array();
+          $response_data['error'] = false;
+          $response_data['message'] = 'Trip Upadted Succesfully';
+          $response->write(json_encode($response_data));
+          return $response
+          ->withHeader('Content-type', 'application/json')
+          ->withStatus(200);
+      }else{
+         $response_data = array();
+         $response_data['error'] = true;
+         $response_data['message'] = 'PLS TRY LATER';
+
+         $response->write(json_encode($response_data));
+
+         return $response
+         ->withHeader('Content-type', 'application/json')
+         ->withStatus(200);
+      }
+    }
+
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(200);
+});
+
+$app->put('/Unassigndrivertotrip/{id}', function(Request $request, Response $response, array $args){
+    $id = $args['id'];
+
+   
+      $request_data = $request->getParsedBody();
+      $db = new DbFunctions;
+      if($db->updateUnassignDriverToPassenger($id)){
+          $response_data = array();
+          $response_data['error'] = false;
+          $response_data['message'] = 'Trip Upadted Succesfully';
+          $response->write(json_encode($response_data));
+          return $response
+          ->withHeader('Content-type', 'application/json')
+          ->withStatus(200);
+      }else{
+         $response_data = array();
+         $response_data['error'] = true;
+         $response_data['message'] = 'PLS TRY LATER';
+
+         $response->write(json_encode($response_data));
+
+         return $response
+         ->withHeader('Content-type', 'application/json')
+         ->withStatus(200);
+      }
+    
+
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(200);
+});
+
 $app->put('/unasigntriptopassenger/{id}', function(Request $request, Response $response, array $args){
     $id = $args['id'];
 
-    if(!haveEmptyParameters(array('id'), $request,$response)){     
+       
       $request_data = $request->getParsedBody();
-      $id = $request_data['id'];
-
+      
       $db = new DbFunctions;
       if($db->updateUnassignTripToPassenger($id)){
           $response_data = array();
@@ -1038,7 +1363,7 @@ $app->put('/unasigntriptopassenger/{id}', function(Request $request, Response $r
          ->withHeader('Content-type', 'application/json')
          ->withStatus(200);
       }
-    }
+   
 
     return $response
     ->withHeader('Content-type', 'application/json')
@@ -1094,6 +1419,40 @@ $app->put('/updatedriver/{id}', function(Request $request, Response $response, a
       }
     }
 
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(200);
+});
+
+$app->put('/updateassignpassengertotrip/{id}', function(Request $request, Response $response, array $args){
+    $id = $args['id'];
+
+    if(!haveEmptyParameters(array('PickUpArea', 'DropOffArea'), $request,$response)){
+       
+      $request_data = $request->getParsedBody();
+      $PickUpArea = $request_data['PickUpArea'];
+      $DropOffArea = $request_data['DropOffArea'];
+      $Assigned = 1;
+
+      $db = new DbFunctions;
+      if($db->updateAssignTripToPassenger($PickUpArea, $DropOffArea, $id, $Assigned)){
+          $response_data = array();
+          $response_data['error'] = false;
+          $response_data['message'] = 'User Upadted Succesfully';
+          $response->write(json_encode($response_data));
+          return $response
+          ->withHeader('Content-type', 'application/json')
+          ->withStatus(200);
+      }else{
+         $response_data = array();
+         $response_data['error'] = true;
+         $response_data['message'] = 'PLS TRY LATER';
+         $response->write(json_encode($response_data));
+         return $response
+         ->withHeader('Content-type', 'application/json')
+         ->withStatus(200);
+      }
+    }
     return $response
     ->withHeader('Content-type', 'application/json')
     ->withStatus(200);
