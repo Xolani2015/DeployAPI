@@ -1,14 +1,14 @@
 <?php
-    //Development connection or local database
-   // define('DB_HOST', 'localhost');
-   // define('DB_USER', 'root');
-    //define('DB_PASSWORD', '');
-   // define('DB_NAME', 'taxiclubdatabase');
+     //Development connection or local database
+     //define('DB_HOST', 'localhost');
+     //define('DB_USER', 'root');
+     //define('DB_PASSWORD', '');
+     //define('DB_NAME', 'taxiclubdatabase');
 
     define('DB_HOST', 'remotemysql.com');
-    define('DB_USER', 'GnfUrDDKhq');
-    define('DB_PASSWORD', 'p861KCBwGD');
-    define('DB_NAME', 'GnfUrDDKhq');
+    define('DB_USER', 'qzB2r5MTUG');
+    define('DB_PASSWORD', '1YNkIk6VEP');
+    define('DB_NAME', 'taxiclubdatabase');
 
     define('USER_CREATED', 101);
     define('USER_EXISTS', 102);
