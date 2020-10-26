@@ -703,6 +703,24 @@
           return true;
           return false;
        }
+
+       public function createMyTrip2($PickUpArea2, $DropOffArea2, $ArrivalTime, $DepartureTime)
+       { 
+            $PickUpAreaID = $this->getPickUpAreaByName($PickUpArea2);
+            $DropOffAreaID = $this->getDropOffAreaByName($DropOffArea2);
+            $HasDriver = "false";
+            $stmt = $this->con->prepare("INSERT INTO mytrip (PickUpAreaID, DropOffAreaID, ArrivalTime, DepartureTime, HasDriver) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("iisss",$PickUpAreaID, $DropOffAreaID, $ArrivalTime, $DepartureTime, $HasDriver);
+            if($stmt->execute())
+            {
+               return USER_CREATED;
+            }   
+            else
+            {
+               return USER_FAILURE;
+            }      
+        return USER_EXISTS;
+       }
     
        public function createTrip($PickUpArea2, $DropOffArea2, $ArrivalTime, $DepartureTime)
        { 
@@ -774,7 +792,7 @@
        public function createMyTrip($PickUpAreaID, $DropOffAreaID, $ArrivalTime)
        {
      
-            $stmt = $this->con->prepare("INSERT INTO mytrip (PickUpAreaID, DropOffAreaID, ArrivalTime) VALUES (?, ?, ?)");
+            $stmt = $this->con->prepare("INSERT INTO trip (PickUpAreaID, DropOffAreaID, ArrivalTime) VALUES (?, ?, ?, ?)");
             $stmt->bind_param("iis",$PickUpAreaID, $DropOffAreaID, $ArrivalTime);
             if($stmt->execute())
             {

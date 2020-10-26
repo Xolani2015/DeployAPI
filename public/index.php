@@ -373,7 +373,7 @@ $app->post('/createtrip', function(Request $request, Response $response){
         $DepartureTime = $request_data['DepartureTime'];
         
         $db = new DbFunctions ;
-        $result = $db->createTrip($PickUpArea, $DropOffArea, $ArrivalTime, $DepartureTime);
+        $result = $db->createMyTrip2($PickUpArea, $DropOffArea, $ArrivalTime, $DepartureTime);
 
         if($result == USER_CREATED){        
            $message = array();
