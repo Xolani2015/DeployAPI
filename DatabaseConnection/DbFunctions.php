@@ -34,6 +34,25 @@
         return DRIVER_EXISTS;
        }
 
+
+       public function createAdmin($Name, $Surname,$Email, $Cell, $Password)                                 
+       {
+         if(!$this->EmailCheckerExistAdmin($Email))
+         {        
+            $stmt = $this->con->prepare("INSERT INTO admin (Name, Surname, Email, Cell, Password) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssss", $Name, $Surname, $Email, $Cell, $Password); 
+                                        
+            if($stmt->execute())
+            {
+               return DRIVER_CREATED;
+            }   
+            else
+            {
+               return DRIVER_FAILURE;
+            }
+         }
+        return DRIVER_EXISTS;
+       }
       
 
      
@@ -766,6 +785,29 @@
           }
        }
 
+       private function EmailCheckerExistAdmin($Email)
+       {
+          $stmt = $this->con->prepare("SELECT id FROM admin WHERE Email = ?");
+          $stmt->bind_param("s", $Email);
+          $stmt->execute();
+          $stmt->store_result();
+          return $stmt->num_rows > 0;
+       }
+
+       public function AdminLogin($Email, $Password)
+       {
+          if($this->EmailCheckerExistAdmin($Email)){
+          $hashed_password = $this->getAdminPasswordByEmail($Email);
+             if(password_verify($Password, $hashed_password)){
+                return USER_AUTHENTICATED;
+             }else{
+                return USER_PASSWORD_DO_NOT_MATCH;
+             }
+          }else{
+             return USER_NOT_FOUND;
+          }
+       }
+
        public function PassengerLogin($Email, $Password)
        {
           if($this->EmailCheckerExistPassenger($Email)){
@@ -833,6 +875,16 @@
        public function getUsersPasswordByEmail($Email)
        {
           $stmt = $this->con->prepare("SELECT Password FROM singleuser WHERE Email = ?");
+          $stmt->bind_param("s", $Email);
+          $stmt->execute();
+          $stmt->bind_result($Password);
+          $stmt->fetch();
+          return $Password;
+       }  
+
+       public function getAdminPasswordByEmail($Email)
+       {
+          $stmt = $this->con->prepare("SELECT Password FROM admin WHERE Email = ?");
           $stmt->bind_param("s", $Email);
           $stmt->execute();
           $stmt->bind_result($Password);
@@ -1458,6 +1510,23 @@
          $user['Cell']=$Cell;
          return $user; 
       }
+
+      public function getAdminByEmail($Email)
+      {
+         $stmt = $this->con->prepare("SELECT id, Name,Surname, Email, Cell FROM admin WHERE Email = ?");
+         $stmt->bind_param("s", $Email);
+         $stmt->execute();
+         $stmt->bind_result($id, $Name, $Surname, $Email, $Cell);
+         $stmt->fetch();
+         $user=array();
+         $user['id']=$id;
+         $user['Name']=$Name;
+         $user['Surname']=$Surname;
+         $user['Email']=$Email;
+         $user['Cell']=$Cell;
+         return $user; 
+      }
+
 
       public function getPassengerByEmail($Email)
       {

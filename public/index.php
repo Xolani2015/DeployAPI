@@ -18,6 +18,58 @@ $app = new \Slim\App([
      endpoint = create driver
      Arguments = Name, Surname, UserType, Email, Cell, Username, Password 
 */
+
+$app->post('/createadmin', function(Request $request, Response $response){
+    if(!haveEmptyParameters(array('Name', 'Surname', 'Email', 'Cell', 'Password'), $request,$response)){
+        $request_data = $request->getParsedBody();
+        $Name = $request_data['Name'];
+        $Surname = $request_data['Surname'];   
+        $Email = $request_data['Email'];
+        $Cell = $request_data['Cell'];
+        $Password = $request_data['Password'];
+        $HashedPassword = password_hash($Password, PASSWORD_DEFAULT);
+        $db = new DbFunctions;
+        $result = $db->createAdmin($Name, $Surname,$Email, $Cell, $HashedPassword);
+        if($result == DRIVER_CREATED){              
+           $message = array();
+           $message['error'] = false;
+           $message['message'] = 'Admin created successfully';        
+           $response->write(json_encode($message));
+           return $response
+                       ->withHeader('Content-type', 'application/json')
+                       ->withStatus(201);
+        }else if($result == DRIVER_FAILURE){
+
+           $message = array();
+           $message['error'] = true;
+           $message['message'] = 'NOOO Some error happened';
+           
+           $response->write(json_encode($message));
+
+           return $response
+                       ->withHeader('Content-type', 'application/json')
+                       ->withStatus(422);
+
+        }else if ($result == DRIVER_EXISTS){
+
+           $message = array();
+           $message['error'] = true;
+           $message['message'] = 'Email already exsit';
+           
+           $response->write(json_encode($message));
+
+           return $response
+                       ->withHeader('Content-type', 'application/json')
+                       ->withStatus(422);
+        }
+
+    }
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(422);
+});
+
+
 $app->post('/createdriver', function(Request $request, Response $response){
     if(!haveEmptyParameters(array('Name', 'Surname', 'Gender', 'Email', 'Cell', 'DriverType'), $request,$response)){
         $request_data = $request->getParsedBody();
@@ -649,6 +701,64 @@ $app->post('/createuser', function(Request $request, Response $response){
      ->withHeader('Content-type', 'application/json')
      ->withStatus(422);
 });
+
+$app->post('/Adminlogin', function(Request $request, Response $response){
+    if(!haveEmptyParameters(array('Email', 'Password'), $request, $response)){
+        $request_data = $request->getParsedBody();
+
+        $Email = $request_data['Email'];
+        $Password = $request_data['Password'];
+
+        $db = new DbFunctions;
+
+        $result = $db->AdminLogin($Email,$Password);
+
+        if($result == USER_AUTHENTICATED){
+           $user = $db->getAdminByEmail($Email);
+           $response_data = array();
+
+           $response_data['error']=false;
+           $response_data['message']='Loging Successful';
+           $response_data['admin']=$user;
+
+           $response->write(json_encode($user));
+
+           return $response
+           ->withHeader('Content-type', 'application/json')
+           ->withStatus(200);
+
+        }else if($result == USER_NOT_FOUND){
+                        $user = $db->getDriverByEmail($Email);
+            $response_data = array();
+
+            $response_data['error']=true;
+            $response_data['message']='User doesnt exist';
+         
+            $response->write(json_encode($response_data));
+ 
+            return $response
+            ->withHeader('Content-type', 'application/json')
+            ->withStatus(200);
+        }else if($result == USER_PASSWORD_DO_NOT_MATCH){
+                        $user = $db->getDriverByEmail($Email);
+            $response_data = array();
+
+            $response_data['error']=true;
+            $response_data['message']='Password does not match';
+      
+ 
+            $response->write(json_encode($response_data));
+ 
+            return $response
+            ->withHeader('Content-type', 'application/json')
+            ->withStatus(200);
+        }
+    }
+   
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(422);
+ });
 
 
 
