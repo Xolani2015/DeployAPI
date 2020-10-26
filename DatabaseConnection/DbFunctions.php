@@ -771,11 +771,11 @@
         return USER_EXISTS;
        }
 
-       public function createMyTrip($PickUpAreaID, $DropOffAreaID, $ArrivalTime, $DepartureTime)
+       public function createMyTrip($PickUpAreaID, $DropOffAreaID, $ArrivalTime)
        {
      
-            $stmt = $this->con->prepare("INSERT INTO trip (PickUpAreaID, DropOffAreaID, ArrivalTime, DepartureTime) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("iiss",$PickUpAreaID, $DropOffAreaID, $ArrivalTime, $DepartureTime);
+            $stmt = $this->con->prepare("INSERT INTO mytrip (PickUpAreaID, DropOffAreaID, ArrivalTime) VALUES (?, ?, ?)");
+            $stmt->bind_param("iis",$PickUpAreaID, $DropOffAreaID, $ArrivalTime);
             if($stmt->execute())
             {
                return USER_CREATED;

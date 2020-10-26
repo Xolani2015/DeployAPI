@@ -590,15 +590,15 @@ $app->post('/createrequest', function(Request $request, Response $response){
 });
 
 $app->post('/createmytrip', function(Request $request, Response $response){
-    if(!haveEmptyParameters(array('DropOffAreaID', 'PickUpAreaID', 'DepartureTime', 'ArrivalTime'), $request,$response)){
+    if(!haveEmptyParameters(array('DropOffAreaID', 'PickUpAreaID', 'ArrivalTime'), $request,$response)){
         $request_data = $request->getParsedBody();
         $DropOffAreaID = $request_data['DropOffAreaID'];
         $PickUpAreaID = $request_data['PickUpAreaID'];
         $ArrivalTime = $request_data['ArrivalTime'];
-        $DepartureTime = $request_data['DepartureTime'];
+        
         $db = new DbFunctions ;
 
-        $result = $db->createMyTrip($PickUpAreaID, $DropOffAreaID, $ArrivalTime, $DepartureTime);
+        $result = $db->createMyTrip($PickUpAreaID, $DropOffAreaID, $ArrivalTime);
 
         if($result == USER_CREATED){
                 
