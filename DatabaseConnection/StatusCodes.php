@@ -10,7 +10,7 @@
     define('DB_PASSWORD', 'ca63CO3MrC');
     define('DB_NAME', 'oNeJ4OcATB');
 
-    define('USER_CREATED', 101);
+   define('USER_CREATED', 101);
     define('USER_EXISTS', 102);
     define('USER_FAILURE', 103);
 
