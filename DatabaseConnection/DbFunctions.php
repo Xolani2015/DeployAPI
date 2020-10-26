@@ -207,10 +207,10 @@
        public function getAllTrips2()
        {
          $stmt2 = $this->con->prepare("SELECT mytrip.id, mytrip.HasDriver,mytrip.ArrivalTime, mytrip.DepartureTime, 
-         pickuparea.PickUpArea, dropoffarea.DropOffArea FROM mytrip, pickuparea, 
+         pickuparea.PickUpArea, dropoffarea.DropOffArea, mytrip.DriverID FROM mytrip, pickuparea, 
          dropoffarea WHERE dropoffarea.id=DropOffAreaID AND pickuparea.id=PickUpAreaID ORDER BY mytrip.id;");
          $stmt2->execute();
-         $stmt2->bind_result($id, $HasDriver, $ArrivalTime, $DepartureTime, $PickUpArea,$DropOffArea);
+         $stmt2->bind_result($id, $HasDriver, $ArrivalTime, $DepartureTime, $PickUpArea,$DropOffArea, $DriverID);
          $users = array();
          while($stmt2->fetch()){
          $user=array();
@@ -220,6 +220,7 @@
          $user['DepartureTime']=$DepartureTime;
          $user['PickUpArea']=$PickUpArea;
          $user['DropOffArea']=$DropOffArea;
+         $user['DriverID']=$DriverID;
          array_push($users, $user);
          }
           return $users;
@@ -596,7 +597,7 @@
        {  
           $DriverID = NULL;
           $HasDriver = "false";
-          $stmt = $this->con->prepare("UPDATE trip SET DriverID = ?, HasDriver = ? WHERE id = ?");
+          $stmt = $this->con->prepare("UPDATE mytrip SET DriverID = ?, HasDriver = ? WHERE id = ?");
           $stmt->bind_param("isi", $DriverID, $HasDriver, $id);
           if($stmt->execute())
           return true;
@@ -1770,7 +1771,7 @@
 
       public function UnassignDriverToTrip($DriverID, $id)
       {
-         $stmt = $this->con->prepare("UPDATE trip SET DriverID = ? WHERE id = ?");
+         $stmt = $this->con->prepare("UPDATE mytrip SET DriverID = ? WHERE id = ?");
          $stmt->bind_param("ii", $DriverID,$id);
          if($stmt->execute())
             return true;
