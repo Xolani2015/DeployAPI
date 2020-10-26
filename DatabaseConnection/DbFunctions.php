@@ -722,6 +722,23 @@
         return USER_EXISTS;
        }
 
+
+       public function createTrip2($PickUpAreaID, $DropOffAreaID, $ArrivalTime, $DepartureTime)
+       {     
+            $HasDriver = "false";
+            $stmt = $this->con->prepare("INSERT INTO trip (PickUpAreaID, DropOffAreaID, ArrivalTime, DepartureTime, HasDriver) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("iisss",$PickUpAreaID, $DropOffAreaID, $ArrivalTime, $DepartureTime, $HasDriver);
+            if($stmt->execute())
+            {
+               return USER_CREATED;
+            }   
+            else
+            {
+               return USER_FAILURE;
+            }      
+        return USER_EXISTS;
+       }
+
        public function createNotification($Message, $CreateDate, $PassengerID, $ForWhat)
        { 
             $HasDriver = "false";

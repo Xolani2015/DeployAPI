@@ -413,6 +413,57 @@ $app->post('/createtrip', function(Request $request, Response $response){
     ->withStatus(422);
 });
 
+$app->post('/createtripweb', function(Request $request, Response $response){
+    if(!haveEmptyParameters(array('PickUpAreaID', 'DropOffAreaID', 'ArrivalTime', 'DepartureTime'), $request,$response)){
+        $request_data = $request->getParsedBody();
+        $PickUpAreaID = $request_data['PickUpAreaID'];
+        $DropOffAreaID = $request_data['DropOffAreaID'];
+      
+        
+        $ArrivalTime = $request_data['ArrivalTime'];
+        $DepartureTime = $request_data['DepartureTime'];
+        
+        $db = new DbFunctions ;
+        $result = $db->createTrip2($PickUpAreaID, $DropOffAreaID, $ArrivalTime, $DepartureTime);
+
+        if($result == USER_CREATED){        
+           $message = array();
+           $message['error'] = false;
+           $message['message'] = 'User created successfully';        
+           $response->write(json_encode($message));
+           return $response
+                       ->withHeader('Content-type', 'application/json')
+                       ->withStatus(201);
+        }else if($result == USER_FAILURE){
+           $message = array();
+           $message['error'] = true;
+           $message['message'] = 'NOOO Some error happened';
+           
+           $response->write(json_encode($message));
+
+           return $response
+                       ->withHeader('Content-type', 'application/json')
+                       ->withStatus(422);
+
+        }else if ($result == USER_EXISTS){
+
+           $message = array();
+           $message['error'] = true;
+           $message['message'] = 'Surname already exsit bro';
+           
+           $response->write(json_encode($message));
+
+           return $response
+                       ->withHeader('Content-type', 'application/json')
+                       ->withStatus(422);
+        }
+
+    }
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(422);
+});
+
 
 $app->post('/createnotification', function(Request $request, Response $response){
     if(!haveEmptyParameters(array('Message', 'PassengerID', 'CreateDate', 'ForWhat'), $request,$response)){
