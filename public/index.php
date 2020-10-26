@@ -598,7 +598,7 @@ $app->post('/createmytrip', function(Request $request, Response $response){
         $DepartureTime = $request_data['DepartureTime'];
         $db = new DbFunctions ;
 
-        $result = $db->createTrip2($PickUpAreaID, $DropOffAreaID, $ArrivalTime, $DepartureTime);
+        $result = $db->createMyTrip($PickUpAreaID, $DropOffAreaID, $ArrivalTime, $DepartureTime);
 
         if($result == USER_CREATED){
                 
