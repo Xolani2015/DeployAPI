@@ -429,21 +429,21 @@ $app->post('/createtripweb', function(Request $request, Response $response){
         if($result == USER_CREATED){        
            $message = array();
            $message['error'] = false;
-           $message['message'] = 'User created successfully';        
+           $message['message'] = 'Trip created successfully';        
            $response->write(json_encode($message));
            return $response
                        ->withHeader('Content-type', 'application/json')
-                       ->withStatus(201);
+                       ->withStatus(101);
         }else if($result == USER_FAILURE){
            $message = array();
            $message['error'] = true;
-           $message['message'] = 'NOOO Some error happened';
+           $message['message'] = 'Some Error has taken place';
            
            $response->write(json_encode($message));
 
            return $response
                        ->withHeader('Content-type', 'application/json')
-                       ->withStatus(422);
+                       ->withStatus(103);
 
         }else if ($result == USER_EXISTS){
 
@@ -455,7 +455,7 @@ $app->post('/createtripweb', function(Request $request, Response $response){
 
            return $response
                        ->withHeader('Content-type', 'application/json')
-                       ->withStatus(422);
+                       ->withStatus(103);
         }
 
     }
