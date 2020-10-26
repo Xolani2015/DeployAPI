@@ -6,9 +6,9 @@
      //define('DB_NAME', 'taxiclubdatabase');
 
     define('DB_HOST', 'remotemysql.com');
-    define('DB_USER', 'qzB2r5MTUG');
-    define('DB_PASSWORD', '1YNkIk6VEP');
-    define('DB_NAME', 'qzB2r5MTUG');
+    define('DB_USER', 'oNeJ4OcATB');
+    define('DB_PASSWORD', 'ca63CO3MrC');
+    define('DB_NAME', 'oNeJ4OcATB');
 
     define('USER_CREATED', 101);
     define('USER_EXISTS', 102);
