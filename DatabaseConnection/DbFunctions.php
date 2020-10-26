@@ -204,6 +204,27 @@
           return $users;
        }
 
+       public function getAllTrips2()
+       {
+         $stmt2 = $this->con->prepare("SELECT mytrip.id, mytrip.HasDriver,mytrip.ArrivalTime, mytrip.DepartureTime, 
+         pickuparea.PickUpArea, dropoffarea.DropOffArea FROM mytrip, pickuparea, 
+         dropoffarea WHERE dropoffarea.id=DropOffAreaID AND pickuparea.id=PickUpAreaID ORDER BY mytrip.id;");
+         $stmt2->execute();
+         $stmt2->bind_result($id, $HasDriver, $ArrivalTime, $DepartureTime, $PickUpArea,$DropOffArea);
+         $users = array();
+         while($stmt2->fetch()){
+         $user=array();
+         $user['id']=$id;
+         $user['HasDriver']=$HasDriver;
+         $user['ArrivalTime']=$ArrivalTime;
+         $user['DepartureTime']=$DepartureTime;
+         $user['PickUpArea']=$PickUpArea;
+         $user['DropOffArea']=$DropOffArea;
+         array_push($users, $user);
+         }
+          return $users;
+       }
+
 
        public function getAllTrips()
        {
@@ -504,7 +525,7 @@
        {  
           $DriverID = $this->getDriverByName($Name);
           $HasDriver = "true";
-          $stmt = $this->con->prepare("UPDATE trip SET DriverID = ?, HasDriver = ? WHERE id = ?");
+          $stmt = $this->con->prepare("UPDATE mytrip SET DriverID = ?, HasDriver = ? WHERE id = ?");
           $stmt->bind_param("isi", $DriverID, $HasDriver, $id);
           if($stmt->execute())
           return true;

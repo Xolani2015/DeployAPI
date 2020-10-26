@@ -1140,7 +1140,7 @@ $app->get('/alldropoff', function(Request $request, Response $response){
 
 $app->get('/alltrips', function(Request $request, Response $response){
     $db = new DbFunctions;
-    $users = $db->getAllTrips();
+    $users = $db->getAllTrips2();
 
     $response_data = array();
 
