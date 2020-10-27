@@ -207,10 +207,10 @@
        public function getAllTrips2()
        {
          $stmt2 = $this->con->prepare("SELECT mytrip.id, mytrip.HasDriver,mytrip.ArrivalTime, mytrip.DepartureTime, 
-         pickuparea.PickUpArea, dropoffarea.DropOffArea, mytrip.DriverID FROM mytrip, pickuparea, 
+         pickuparea.PickUpArea, dropoffarea.DropOffArea FROM mytrip, pickuparea, 
          dropoffarea WHERE dropoffarea.id=DropOffAreaID AND pickuparea.id=PickUpAreaID ORDER BY mytrip.id;");
          $stmt2->execute();
-         $stmt2->bind_result($id, $HasDriver, $ArrivalTime, $DepartureTime, $PickUpArea,$DropOffArea, $DriverID);
+         $stmt2->bind_result($id, $HasDriver, $ArrivalTime, $DepartureTime, $PickUpArea,$DropOffArea);
          $users = array();
          while($stmt2->fetch()){
          $user=array();
@@ -220,7 +220,7 @@
          $user['DepartureTime']=$DepartureTime;
          $user['PickUpArea']=$PickUpArea;
          $user['DropOffArea']=$DropOffArea;
-         $user['DriverID']=$DriverID;
+        
          array_push($users, $user);
          }
           return $users;
@@ -651,8 +651,8 @@
 
          public function getDriverTrips($DriverID)
          {
-              $stmt = $this->con->prepare("SELECT trip.id, pickuparea.PickUpArea, dropoffarea.DropOffArea, trip.ArrivalTime, trip.DepartureTime 
-              FROM trip, pickuparea, dropoffarea WHERE DriverID = ? AND trip.PickUpAreaID=pickuparea.id AND trip.DropOffAreaID =dropoffarea.id" );
+              $stmt = $this->con->prepare("SELECT mytrip.id, pickuparea.PickUpArea, dropoffarea.DropOffArea, mytrip.ArrivalTime, mytrip.DepartureTime 
+              FROM mytrip, pickuparea, dropoffarea WHERE DriverID = ? AND mytrip.PickUpAreaID=pickuparea.id AND mytrip.DropOffAreaID =dropoffarea.id" );
               $stmt->bind_param("i", $DriverID);
               $stmt->execute();
               $stmt->bind_result($id, $PickUpArea, $DropOffArea, $ArrivalTime,$DepartureTime);
@@ -1240,21 +1240,21 @@
 
        public function getTripByIdForTripWithNoDriver($id)
        {
-          $stmt = $this->con->prepare("SELECT trip.id, trip.HasDriver, pickuparea.PickUpArea, dropoffarea.DropOffArea, pickuparea.id, dropoffarea.id, 
-          Bill, ArrivalTime, DepartureTime FROM trip, 
-          pickuparea, dropoffarea WHERE trip.id = ? AND 
+          $stmt = $this->con->prepare("SELECT mytrip.id, mytrip.HasDriver, pickuparea.PickUpArea, dropoffarea.DropOffArea, pickuparea.id, dropoffarea.id, 
+          ArrivalTime, DepartureTime FROM mytrip, 
+          pickuparea, dropoffarea WHERE mytrip.id = ? AND 
           PickUpAreaID=pickuparea.id AND DropOffAreaID=dropoffarea.id");
  
           $stmt->bind_param("i", $id);
           $stmt->execute();
-          $stmt->bind_result($id,$HasDriver, $PickUpArea, $DropOffArea, $PickUpAreaID, $DropOffAreaID, $Bill, $ArrivalTime, $DepartureTime);
+          $stmt->bind_result($id,$HasDriver, $PickUpArea, $DropOffArea, $PickUpAreaID, $DropOffAreaID, $ArrivalTime, $DepartureTime);
           $stmt->fetch();
           $user=array();
           $user['id']=$id;
           $user['HasDriver']=$HasDriver;
           $user['PickUpArea']=$PickUpArea;
           $user['DropOffArea']=$DropOffArea;
-          $user['Bill']=$Bill;
+         
           $user['ArrivalTime']=$ArrivalTime;
           $user['DepartureTime']=$DepartureTime;
           $user['PickUpAreaID']=$PickUpAreaID;
@@ -1264,16 +1264,16 @@
 
        public function getTripById($id)
        {
-          $stmt = $this->con->prepare("SELECT trip.id, trip.HasDriver, pickuparea.PickUpArea, dropoffarea.DropOffArea, driver.Name, 
+          $stmt = $this->con->prepare("SELECT mytrip.id, mytrip.HasDriver, pickuparea.PickUpArea, dropoffarea.DropOffArea, driver.Name, 
           driver.Surname, driver.id, driver.Cell, 
           driver.Email, driver.Gender, pickuparea.id, dropoffarea.id, 
-          Bill, ArrivalTime, DepartureTime FROM trip, 
-          pickuparea, dropoffarea, driver WHERE trip.id = ? AND 
+          ArrivalTime, DepartureTime FROM mytrip, 
+          pickuparea, dropoffarea, driver WHERE mytrip.id = ? AND 
           PickUpAreaID=pickuparea.id AND DropOffAreaID=dropoffarea.id 
           AND DriverID=driver.id");
           $stmt->bind_param("i", $id);
           $stmt->execute();
-          $stmt->bind_result($id,$HasDriver, $PickUpArea, $DropOffArea, $Name, $Surname, $DriverID,$Cell, $Email,$Gender, $PickUpAreaID, $DropOffAreaID, $Bill, $ArrivalTime, $DepartureTime);
+          $stmt->bind_result($id,$HasDriver, $PickUpArea, $DropOffArea, $Name, $Surname, $DriverID,$Cell, $Email,$Gender, $PickUpAreaID, $DropOffAreaID, $ArrivalTime, $DepartureTime);
           $stmt->fetch();
           $user=array();
           $user['id']=$id;
@@ -1283,7 +1283,6 @@
           $user['Name']=$Name;
           $user['Surname']=$Surname;
           $user['DriverID']=$DriverID;
-          $user['Bill']=$Bill;
           $user['ArrivalTime']=$ArrivalTime;
           $user['DepartureTime']=$DepartureTime;
           $user['PickUpAreaID']=$PickUpAreaID;
@@ -1327,13 +1326,13 @@
        {
    
          $PickUpAreaID= $this->getPickUpAreaByName($PickUpAreaName);
-         $stmt = $this->con->prepare("SELECT trip.DropOffAreaID, trip.id, dropoffarea.DropOffArea, 
-         trip.ArrivalTime, trip.DepartureTime, trip.HasDriver, trip.Bill FROM trip, dropoffarea WHERE PickUpAreaID= ? 
-         AND trip.DropOffAreaID = dropoffarea.id");     
+         $stmt = $this->con->prepare("SELECT mytrip.DropOffAreaID, mytrip.id, dropoffarea.DropOffArea, 
+         mytrip.ArrivalTime, mytrip.DepartureTime, mytrip.HasDriver FROM mytrip, dropoffarea WHERE PickUpAreaID= ? 
+         AND mytrip.DropOffAreaID = dropoffarea.id");     
           
          $stmt->bind_param("i", $PickUpAreaID);
          $stmt->execute(); 
-         $stmt->bind_result($DropOffAreaID, $id, $DropOffArea, $ArrivalTime, $DepartureTime, $HasDriver, $Bill);  
+         $stmt->bind_result($DropOffAreaID, $id, $DropOffArea, $ArrivalTime, $DepartureTime, $HasDriver);  
           $users = array();
           while($stmt->fetch()){
             $user=array();
@@ -1341,8 +1340,7 @@
             $user['DropOffArea']=$DropOffArea;
             $user['ArrivalTime']=$ArrivalTime;
             $user['DepartureTime']=$DepartureTime;
-            $user['HasDriver']=$HasDriver;
-            $user['Bill']=$Bill;
+            $user['HasDriver']=$HasDriver;         
             array_push($users, $user);
             }
            return $users; 
@@ -1518,13 +1516,13 @@
        {    
          $stmt = $this->con->prepare("SELECT passenger.id, passenger.Name, passenger.Surname,passenger.Gender, passenger.BirthDate,
          passenger.HomeAddress,passenger.Email,passenger.Cell, passenger.PickUpLocation,
-         passenger.DropOffLocation, passenger.TripID, trip.Bill,trip.ArrivalTime, 
-         trip.DepartureTime, pickuparea.PickUpArea, dropoffarea.DropOffArea, driver.id, driver.Name, driver.Surname, driver.Gender, driver.Email, driver.Cell
-         FROM passenger, trip, pickuparea, dropoffarea, driver
-         WHERE passenger.id = ? AND trip.id=TripID AND pickuparea.id=PickUpAreaID AND driver.id=DriverID
+         passenger.DropOffLocation, passenger.TripID, mytrip.ArrivalTime, 
+         mytrip.DepartureTime, pickuparea.PickUpArea, dropoffarea.DropOffArea, driver.id, driver.Name, driver.Surname, driver.Gender, driver.Email, driver.Cell
+         FROM passenger, mytrip, pickuparea, dropoffarea, driver
+         WHERE passenger.id = ? AND mytrip.id=TripID AND pickuparea.id=PickUpAreaID AND driver.id=DriverID
          AND dropoffarea.id=DropOffAreaID ORDER BY passenger.id;");
          $stmt->bind_param("i", $id);
-         $stmt->bind_result($id, $Name, $Surname,$Gender, $BirthDate,$HomeAddress, $Email, $Cell, $PickUpLocation,$DropOffLocation,$TripID, $Bill,$ArrivalTime,
+         $stmt->bind_result($id, $Name, $Surname,$Gender, $BirthDate,$HomeAddress, $Email, $Cell, $PickUpLocation,$DropOffLocation,$TripID, $ArrivalTime,
          $DepartureTime, $PickUpArea,  $DropOffArea, $DriverID, $DriverName, $DriverSurname, $DriverGender, $DriverEmail, $DriverCell);
          $stmt->execute();
          $stmt->fetch();
@@ -1540,7 +1538,6 @@
          $user['PickUpLocation']=$PickUpLocation;
          $user['DropOffLocation']=$DropOffLocation;
          $user['TripID']=$TripID;
-         $user['Bill']=$Bill;
          $user['ArrivalTime']=$ArrivalTime;
          $user['PickUpArea']=$PickUpArea;
          $user['DropOffArea']=$DropOffArea;
