@@ -1073,13 +1073,13 @@
           $stmt = $this->con->prepare("SELECT driver.id, driver.Name, driver.Surname, driver.Email, 
           driver.Cell, driver.Gender, driver.UserCreateDate, driver.DriverType,
           driver.AccountActive, driver.HasVehicle, 
-          vehicle.Name, vehicle.Description, vehicle.Type, vehicle.Capacity, vehicle.State, vehicle.StateDescription, 
+          vehicle.Name, vehicle.Description, vehicle.Type, vehicle.State, vehicle.StateDescription, 
           vehicle.DateAdded,vehicle.Registration FROM driver, vehicle WHERE driver.id = ?
           AND driver.VehicleID=vehicle.id");
           $stmt->bind_param("i", $id);
           $stmt->execute();
           $stmt->bind_result($id, $Name, $Surname, $Email, $Cell, $Gender, $UserCreateDate, $DriverType,$AccountActive,
-          $HasVehicle, $VehicleName, $VehicleDescription, $VehicleType, $VehicleCapacity, $VehicleState, 
+          $HasVehicle, $VehicleName, $VehicleDescription, $VehicleType, $VehicleState, 
           $VehicleStateDescription, $VehicleDateAdded, $VehicleRegistration);
           $stmt->fetch();
           $user=array();
@@ -1097,7 +1097,7 @@
           $user['VehicleName']=$VehicleName;
           $user['VehicleDescription']=$VehicleDescription;
           $user['VehicleType']=$VehicleType;
-          $user['VehicleCapacity']=$VehicleCapacity;
+         
           $user['VehicleStateDescription']=$VehicleStateDescription;
           $user['VehicleDateAdded']=$VehicleDateAdded;
           $user['VehicleRegistration']=$VehicleRegistration;
