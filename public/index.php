@@ -1313,6 +1313,23 @@ $app->get('/driver/{id}', function(Request $request, Response $response,  array 
     ->withStatus(200); 
 });
 
+$app->get('/Count/{id}', function(Request $request, Response $response,  array $args){
+    $id = $args['id'];
+    $db = new DbFunctions;
+    $user = $db->CountPassengersInTrip($id);
+
+    $response_data = array();
+
+    $response_data['error'] = false;
+    $response_data['user'] = $user;
+
+    $response->write(json_encode($user));
+
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(200); 
+});
+
 
 $app->get('/webdrivertrips/{id}', function(Request $request, Response $response,  array $args){
     $id = $args['id'];

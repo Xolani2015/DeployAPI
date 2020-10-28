@@ -220,7 +220,7 @@
          $user['DepartureTime']=$DepartureTime;
          $user['PickUpArea']=$PickUpArea;
          $user['DropOffArea']=$DropOffArea;
-        
+         
          array_push($users, $user);
          }
           return $users;
@@ -1401,7 +1401,16 @@
           return $user; 
        } 
 
-
+       public function CountPassengersInTrip($TripID)
+       {
+          $stmt = $this->con->prepare("SELECT count(id) AS total FROM passenger WHERE TripID  = ?");
+          $stmt->bind_param("i", $TripID);
+          $stmt->execute();
+          $stmt->bind_result($id);
+          $stmt->fetch();
+          $user=array();
+          return $id; 
+       } 
 
        public function getPassengerRequestById($id)
        {
