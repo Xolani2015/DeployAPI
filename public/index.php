@@ -249,19 +249,19 @@ $app->post('/mobilecreatepassenger', function(Request $request, Response $respon
 });
 
 $app->post('/createvehicle', function(Request $request, Response $response){
-    if(!haveEmptyParameters(array('Name' , 'Description', 'Type', 'Capacity', 'StateDescription', 'Registration'), $request,$response)){
+    if(!haveEmptyParameters(array('Name' , 'Description', 'Type', 'StateDescription', 'Registration'), $request,$response)){
         $request_data = $request->getParsedBody();
         $Name = $request_data['Name'];
         $Description = $request_data['Description'];
         $Type = $request_data['Type'];
-        $Capacity = $request_data['Capacity'];
+        
 
         $State ="Working";
         $StateDescription = $request_data['StateDescription'];
         $DateAdded = date("m/d/Y");
         $Registration = $request_data['Registration'];
         $db = new DbFunctions;
-        $result = $db->createVehicle($Name , $Description, $Type, $Capacity, $State, $StateDescription, $DateAdded, $Registration);
+        $result = $db->createVehicle($Name , $Description, $Type, $State, $StateDescription, $DateAdded, $Registration);
 
         if($result == USER_CREATED){        
            $message = array();

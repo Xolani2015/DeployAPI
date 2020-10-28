@@ -474,11 +474,11 @@
        }
 
      
-       public function createVehicle($Name , $Description, $Type, $Capacity,  $State, $StateDescription, $DateAdded, $Registration)
+       public function createVehicle($Name , $Description, $Type,  $State, $StateDescription, $DateAdded, $Registration)
        {
      
-            $stmt = $this->con->prepare("INSERT INTO vehicle (Name , Description, Type, Capacity, State, StateDescription, DateAdded, Registration) VALUES (?,?,?,?,?,?,?,?)");
-            $stmt->bind_param("sssissss",$Name , $Description, $Type, $Capacity,  $State, $StateDescription, $DateAdded, $Registration);
+            $stmt = $this->con->prepare("INSERT INTO vehicle (Name , Description, Type,  State, StateDescription, DateAdded, Registration) VALUES (?,?,?,?,?,?,?)");
+            $stmt->bind_param("sssssss",$Name, $Description, $Type, $State, $StateDescription, $DateAdded, $Registration);
             if($stmt->execute())
             {
                return USER_CREATED;
