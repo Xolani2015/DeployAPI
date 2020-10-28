@@ -468,18 +468,12 @@ $app->post('/createnotification', function(Request $request, Response $response)
 
 
 $app->post('/createpickuparea', function(Request $request, Response $response){
-    if(!haveEmptyParameters(array('PickUpArea', 'TimeArrival', 'TimeDepature'), $request,$response)){
+    if(!haveEmptyParameters(array('PickUpArea'), $request,$response)){
         $request_data = $request->getParsedBody();
-
         $PickUpArea = $request_data['PickUpArea'];
-        $TimeArrival = $request_data['TimeArrival'];
-        $TimeDepature = $request_data['TimeDepature'];
-        $db = new DbFunctions ;
-
-        $result = $db->createPickUpArea($PickUpArea, $TimeArrival, $TimeDepature);
-
-        if($result == USER_CREATED){
-                
+        $db = new DbFunctions;
+        $result = $db->createPickUpArea($PickUpArea);
+        if($result == USER_CREATED){           
            $message = array();
            $message['error'] = false;
            $message['message'] = 'User created successfully';
@@ -644,14 +638,13 @@ $app->post('/createmytrip', function(Request $request, Response $response){
 
 
 $app->post('/createdropoffarea', function(Request $request, Response $response){
-    if(!haveEmptyParameters(array('DropOffArea', 'TimeArrival', 'TimeDepature'), $request,$response)){
+    if(!haveEmptyParameters(array('DropOffArea'), $request,$response)){
         $request_data = $request->getParsedBody();
         $DropOffArea = $request_data['DropOffArea'];
-        $TimeArrival = $request_data['TimeArrival'];
-        $TimeDepature = $request_data['TimeDepature'];
+
         $db = new DbFunctions ;
 
-        $result = $db->createDropOffArea($DropOffArea, $TimeArrival, $TimeDepature);
+        $result = $db->createDropOffArea($DropOffArea);
 
         if($result == USER_CREATED){
                 

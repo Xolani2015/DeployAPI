@@ -379,10 +379,10 @@
             }
        }
 
-       public function createPickUpArea($PickUpArea, $TimeArrival, $TimeDepature)
+       public function createPickUpArea($PickUpArea)
        {
-            $stmt = $this->con->prepare("INSERT INTO pickuparea (PickUpArea, TimeArrival, TimeDepature) VALUES (?, ?, ?)");
-            $stmt->bind_param("sss",$PickUpArea, $TimeArrival, $TimeDepature);
+            $stmt = $this->con->prepare("INSERT INTO pickuparea (PickUpArea) VALUES (?)");
+            $stmt->bind_param("s",$PickUpArea);
             if($stmt->execute())
             {
                return USER_CREATED;
@@ -828,11 +828,11 @@
         return USER_EXISTS;
        }
 
-       public function createDropOffArea($DropOffArea, $TimeArrival, $TimeDepature)
+       public function createDropOffArea($DropOffArea)
        {
      
-            $stmt = $this->con->prepare("INSERT INTO dropoffarea (DropOffArea, TimeArrival, TimeDepature) VALUES (?, ?, ?)");
-            $stmt->bind_param("sss",$DropOffArea, $TimeArrival, $TimeDepature);
+            $stmt = $this->con->prepare("INSERT INTO dropoffarea (DropOffArea) VALUES (?)");
+            $stmt->bind_param("s",$DropOffArea);
             if($stmt->execute())
             {
                return USER_CREATED;
