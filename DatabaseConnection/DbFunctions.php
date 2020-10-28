@@ -1340,7 +1340,8 @@
             $user['DropOffArea']=$DropOffArea;
             $user['ArrivalTime']=$ArrivalTime;
             $user['DepartureTime']=$DepartureTime;
-            $user['HasDriver']=$HasDriver;         
+            $user['HasDriver']=$HasDriver; 
+            $user['PickUpArea']=$PickUpAreaName;         
             array_push($users, $user);
             }
            return $users; 
@@ -1444,13 +1445,13 @@
       
           $stmt = $this->con->prepare("SELECT passenger.id, passenger.Name, passenger.Surname,passenger.Gender, passenger.BirthDate,
           passenger.HomeAddress,passenger.Email,passenger.Cell, passenger.PickUpLocation,
-          passenger.DropOffLocation, passenger.TripID, trip.Bill,trip.ArrivalTime, 
-          trip.DepartureTime, pickuparea.PickUpArea, dropoffarea.DropOffArea
-          FROM passenger, trip, pickuparea, dropoffarea
-          WHERE passenger.id = ? AND trip.id=TripID AND pickuparea.id=PickUpAreaID
+          passenger.DropOffLocation, passenger.TripID,mytrip.ArrivalTime, 
+          mytrip.DepartureTime, pickuparea.PickUpArea, dropoffarea.DropOffArea
+          FROM passenger, mytrip, pickuparea, dropoffarea
+          WHERE passenger.id = ? AND mytrip.id=TripID AND pickuparea.id=PickUpAreaID
           AND dropoffarea.id=DropOffAreaID ORDER BY passenger.id;");
           $stmt->bind_param("i", $id);
-          $stmt->bind_result($id, $Name, $Surname,$Gender, $BirthDate,$HomeAddress, $Email, $Cell, $PickUpLocation,$DropOffLocation,$TripID, $Bill,$ArrivalTime,
+          $stmt->bind_result($id, $Name, $Surname,$Gender, $BirthDate,$HomeAddress, $Email, $Cell, $PickUpLocation,$DropOffLocation,$TripID, $ArrivalTime,
           $DepartureTime, $PickUpArea,  $DropOffArea);
           $stmt->execute();
           $stmt->fetch();
@@ -1466,7 +1467,7 @@
           $user['PickUpLocation']=$PickUpLocation;
           $user['DropOffLocation']=$DropOffLocation;
           $user['TripID']=$TripID;
-          $user['Bill']=$Bill;
+         
           $user['ArrivalTime']=$ArrivalTime;
           $user['PickUpArea']=$PickUpArea;
           $user['DropOffArea']=$DropOffArea;
